@@ -1,0 +1,5 @@
+REACT_APP_SANITY_PROJECT_ID = sanity_project_id
+REACT_APP_SANITY_DATASET = sanity_dataset_name
+REACT_APP_SANITY_API_VERSION = yyyy-mm-dd
+REACT_APP_SANITY_USE_CDN = boolean_true_or_false
+REACT_APP_SANITY_TOKEN = sanity_token
