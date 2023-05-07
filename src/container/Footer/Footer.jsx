@@ -1,9 +1,11 @@
 import React, { useState, useRef } from "react";
 import emailjs from "@emailjs/browser";
+import { toast, ToastContainer, Slide } from "react-toastify";
 import { images } from "../../constants";
 import { AppWrapp, MotionWrap } from "../../wrapper";
-import { client } from "../../client";
+// import { client } from "../../client";
 import "./Footer.scss";
+import "react-toastify/dist/ReactToastify.min.css";
 
 const Footer = () => {
   const form = useRef();
@@ -13,7 +15,7 @@ const Footer = () => {
     email: "",
     message: "",
   });
-  const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+  const [isEmailSend, setIsEmailSend] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const { name, email, message } = formData;
@@ -23,10 +25,38 @@ const Footer = () => {
     setFormData({ ...formData, [name]: value });
   };
 
+  const notify = (status) => {
+    setIsEmailSend(true);
+
+    if (status === 200) {
+      toast.success("Thank you for get in touch", {
+        position: "top-center",
+        transition: Slide,
+        closeOnClick: false,
+        autoClose: 3000,
+        hideProgressBar: true,
+        theme: "colored",
+      });
+    } else {
+      toast.error(status, {
+        position: "top-center",
+        transition: Slide,
+        closeOnClick: false,
+        autoClose: 3000,
+        hideProgressBar: true,
+        theme: "colored",
+      });
+    }
+
+    setTimeout(() => {
+      setIsEmailSend(false);
+    }, 4000);
+  };
+
   const handleSubmit = () => {
     setLoading(true);
 
-    // save data into sanity 
+    // save data into sanity
     // const contact = {
     //   _type: "contact",
     //   name: name,
@@ -42,18 +72,25 @@ const Footer = () => {
     // send email by using emailjs
     emailjs
       .sendForm(
-        "service_0xqhqml",
-        "template_nxldc2s",
+        process.env.REACT_APP_EMAILJS_SERVICE_ID,
+        process.env.REACT_APP_EMAILJS_TEMPLATE_ID,
         form.current,
-        "_aEPkn1uATxuE9HNS"
+        process.env.REACT_APP_EMAILJS_PUBLIC_KEY
       )
       .then(
         (result) => {
+          setFormData({
+            name: "",
+            email: "",
+            message: "",
+          });
+
           setLoading(false);
-          setIsFormSubmitted(true);
+          notify(result.status);
         },
         (error) => {
-          console.log(error.text);
+          setLoading(false);
+          notify(error.text);
         }
       );
   };
@@ -76,45 +113,52 @@ const Footer = () => {
           </a>
         </div>
       </div>
-      {!isFormSubmitted ? (
-        <form ref={form} className="app__footer-form app__flex">
-          <div className="app__flex">
-            <input
-              type="text"
-              placeholder="Your Name"
-              name="name"
-              value={name}
-              className="p-text"
-              onChange={handelChangeInput}
-            />
-          </div>
-          <div className="app__flex">
-            <input
-              type="email"
-              placeholder="Your Email"
-              name="email"
-              value={email}
-              className="p-text"
-              onChange={handelChangeInput}
-            />
-          </div>
-          <div>
-            <textarea
-              placeholder="Your Message"
-              name="message"
-              value={message}
-              className="p-text"
-              onChange={handelChangeInput}
-            />
-          </div>
-          <button type="button" className="p-text" onClick={handleSubmit}>
-            {loading ? "Sending" : "Send a message"}
-          </button>
-        </form>
-      ) : (
-        <div>
-          <h3 className="head-text">Thank you for get in touch</h3>
+      <form ref={form} className="app__footer-form app__flex">
+        <div className="app__flex">
+          <input
+            type="text"
+            placeholder="Your Name"
+            name="name"
+            value={name}
+            className="p-text"
+            onChange={handelChangeInput}
+          />
         </div>
+        <div className="app__flex">
+          <input
+            type="email"
+            placeholder="Your Email"
+            name="email"
+            value={email}
+            className="p-text"
+            onChange={handelChangeInput}
+          />
+        </div>
+        <div>
+          <textarea
+            placeholder="Your Message"
+            name="message"
+            value={message}
+            className="p-text"
+            onChange={handelChangeInput}
+          />
+        </div>
+        <button
+          type="button"
+          className="p-text"
+          onClick={handleSubmit}
+          disabled={loading}
+        >
+          {loading ? "Sending" : "Send a message"}
+        </button>
+      </form>
+
+      {isEmailSend ? (
+        <div>
+          <ToastContainer />
+        </div>
+      ) : (
+        <></>
       )}
     </>
   );

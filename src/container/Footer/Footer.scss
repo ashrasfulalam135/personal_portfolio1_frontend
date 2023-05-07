@@ -121,6 +121,10 @@
     &:hover {
       background-color: #2430af;
     }
+
+    &:disabled {
+      background-color: var(--gray-color);
+    }
   }
 
   @media screen and (max-width: 768px) {
