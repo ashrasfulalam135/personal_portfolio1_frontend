@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import emailjs from "@emailjs/browser";
 import { images } from "../../constants";
 import { AppWrapp, MotionWrap } from "../../wrapper";
 import { client } from "../../client";
 import "./Footer.scss";
 
 const Footer = () => {
+  const form = useRef();
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -23,17 +26,36 @@ const Footer = () => {
   const handleSubmit = () => {
     setLoading(true);
 
-    const contact = {
-      _type: "contact",
-      name: name,
-      email: email,
-      message: message,
-    };
+    // save data into sanity 
+    // const contact = {
+    //   _type: "contact",
+    //   name: name,
+    //   email: email,
+    //   message: message,
+    // };
 
-    client.create(contact).then(() => {
-      setLoading(false);
-      setIsFormSubmitted(true);
-    });
+    // client.create(contact).then(() => {
+    //   setLoading(false);
+    //   setIsFormSubmitted(true);
+    // });
+
+    // send email by using emailjs
+    emailjs
+      .sendForm(
+        "service_0xqhqml",
+        "template_nxldc2s",
+        form.current,
+        "_aEPkn1uATxuE9HNS"
+      )
+      .then(
+        (result) => {
+          setLoading(false);
+          setIsFormSubmitted(true);
+        },
+        (error) => {
+          console.log(error.text);
+        }
+      );
   };
 
   return (
@@ -55,7 +77,7 @@ const Footer = () => {
         </div>
       </div>
       {!isFormSubmitted ? (
-        <div className="app__footer-form app__flex">
+        <form ref={form} className="app__footer-form app__flex">
           <div className="app__flex">
             <input
               type="text"
@@ -88,7 +110,7 @@ const Footer = () => {
           <button type="button" className="p-text" onClick={handleSubmit}>
             {loading ? "Sending" : "Send a message"}
           </button>
-        </div>
+        </form>
       ) : (
         <div>
           <h3 className="head-text">Thank you for get in touch</h3>
